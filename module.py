@@ -23,7 +23,10 @@ class concat_nn(nn.Module):
 
 class count_positive_prob(nn.Module):
     def __init__(self, c_dim, z_dim):
-        #TODO
+        super(count_positive_prob, self).__init__()
+        self.bilinear_matrix = torch.rand([c_dim, z_dim], require_grad=True)
+
+    def forward(c, shift):
 
 
 def shift(feat, shift):
