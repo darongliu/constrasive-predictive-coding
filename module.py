@@ -23,11 +23,12 @@ class concat_nn(nn.Module):
 
 class count_positive_prob(nn.Module):
     def __init__(self, c_dim, z_dim):
-        super(count_positive_prob, self).__init__()
+        super(count_positive_prob, self).__init__(correct_shift)
+        self.correct_shift = correct_shift
         self.bilinear_matrix = torch.rand([c_dim, z_dim], require_grad=True)
 
     def forward(c, shift):
-
+        Wz_before_shift = torch.matmul(c, self.bilinear_matrix)
 
 def shift(feat, shift):
     # do not shift vertical
