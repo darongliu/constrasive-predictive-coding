@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from utils import *
+
 class concat_nn(nn.Module):
     '''
     concat two neighbor feature and pass through an nn
@@ -32,9 +34,9 @@ class count_NCE_loss(nn.Module):
         self.params = nn.ParameterList(self.bilinear_matrix)
         #self.layers = nn.ModuleList(self.bilinear_matrix)
 
-    def forward(self, c, z, neg_shift):
+    def forward(self, c, z, neg_shift, length):
         '''
-        neg_shift: 1d array with number [self.prediction_num, len]
+        neg_shift: 1d array with number in range[self.prediction_num, len]
         z: [batch x len x z_dim]
         c: [batch x len x c_dim]
         '''
@@ -48,10 +50,11 @@ class count_NCE_loss(nn.Module):
             Wc = Wc.repeat(neg_num+1, 1, 1)
             zWc = torch.sum((Wc*all_z), -1) #[batch*(self.negative+1) x len]
             zWc = zWc.view([-1, neg_num+1, zWc.size()[-1]])
-            print('zWc: ', zWc.size())
             f = torch.exp(zWc) # [batch x (self.negative+1) x len]
             loss  = -torch.log(f[:,0,:]/torch.sum(f[:,1:,:],1)) #[batch x len]
-            total_loss += torch.mean(loss)
+            loss, mask = mask_with_length(loss, length)
+
+            total_loss += torch.sum(loss)/torch.sum(mask)
 
         return total_loss
 
@@ -71,9 +74,10 @@ if __name__ == '__main__':
     test_feat_c = torch.rand([batch, len_, dim_c], dtype=torch.float32).cuda()
     test_feat_z = torch.rand([batch, len_, dim_z], dtype=torch.float32).cuda()
     shift = torch.tensor([1,2,3]).cuda()
+    length = torch.tensor([3,4])
     m = count_NCE_loss(dim_c, dim_z, prediction_num=3)
     m.cuda()
-    print(m(test_feat_c, test_feat_z, shift))
+    print(m(test_feat_c, test_feat_z, shift, length))
     """
     test_feat = torch.rand([batch, len_, dim], dtype=torch.float32).cuda()
     print(test_feat)
