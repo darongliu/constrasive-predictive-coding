@@ -1,24 +1,17 @@
-import torch
-import tqdm
+def get_phn_seq(phn_boundary, length, reduce_num=2):
+    interval = 2**reduce_num
+    transform_length = (length+interval-1)//interval
 
-def inference(model, data_loader, output_path):
-    all_predict = {}
-    for i, data in enumerate(tqdm(data_loader, ncol=70)):
-        context, question, option, question_id, _ = data
-        context, question, option = put_to_cuda([context, question, option])
+    start = 0
+    phn_idx = 0
 
-        output = model(context, question, option)
-        _, predict = torch.max(output)
-        predict_answer = predict.cpu().numpy()[0]
-        all_predict[question_id[0]] = predict_answer
-
-    print('total question number: ', len(all_predict))
-
-    with open(output_path, 'w') as f:
-        f.write('ID,Answer\n')
-        all_key = sorted(all_predict.keys())
-        for key in all_key:
-            ans = all_predict[key]+1
-            f.write(str(key)+','+str(ans)+'\n')
+    all_phn = []
+    for i in range(transform_length):
+        end = start + interval
+        while True:
+            if  end >= phn_boundary[phn_idx][1]:
+                break
+            else:
+                phn_idx += 1
 
 

@@ -12,7 +12,7 @@ class myDataset(torch.utils.data.Dataset):
         if phn_boundary_path is not None:
             self.phn_boundary = pk.load(open(os.path.join(phn_boundary_path, 'phn_align.pkl'), 'rb'))
         else:
-            self.phn_boundary = None
+            self.phn_bouncd dary = None
         print('finish loading data')
 
     def __len__(self):

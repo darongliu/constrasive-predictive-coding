@@ -25,6 +25,14 @@ def mask_with_length(tensor, length):
     tensor[mask] = 0.
     return tensor, (1.-mask).float()
 
+def put_to_cuda(tensor_list):
+    return [x.cuda() for x in tensor_list]
+
+def print_and_logging(f, log):
+    print(log)
+    f.write(log)
+    f.write('\n')
+
 if __name__ == '__main__':
     feat = torch.ones(2, 3, 3, 2).cuda()
     length = torch.tensor([2,1]).cuda()
@@ -33,3 +41,4 @@ if __name__ == '__main__':
     print(a[1])
 
     print(mask[0])
+

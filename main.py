@@ -27,8 +27,6 @@ parser.add_argument('--neg_num', default=8, type=int,
 
 parser.add_argument('--train_data', default='', type=str, metavar='PATH',
                     help='The path of the training (default: none)')
-parser.add_argument('--dev_data', default='', type=str, metavar='PATH',
-                    help='The path of the dev (default: none)')
 parser.add_argument('--test_data', default='', type=str, metavar='PATH',
                     help='The path of the testing (default: none)')
 parser.add_argument('--resume_dir', default='', type=str, metavar='PATH',
