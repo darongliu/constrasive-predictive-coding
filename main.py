@@ -3,7 +3,7 @@ import torch
 import sys
 import os
 
-from model import qacnn_1d
+from model import CPC
 from data_loader import myDataset
 from saver import pytorch_saver
 
@@ -20,21 +20,10 @@ parser.add_argument('-b', '--batch_size', default=20, type=int,
 parser.add_argument('-lr', '--learning_rate', default=0.001, type=float,
                     metavar='LR', help='initial learning rate (default: 0.001)')
 
-parser.add_argument('-filter_num', '--filter_num', default=256, type=int,
-                    help='the number of the filter (default: 256)')
-parser.add_argument('-filter_size', '--filter_size', default=3, type=int,
-                    help='the size of the filter (default: 3)')
-parser.add_argument('-cnn_layers', '--cnn_layers', default=3, type=int,
-                    help='the number of the cnn layers(default: 3)')
-parser.add_argument('-dnn_size', '--dnn_size', default=256, type=int,
-                    help='the size of the dnn layer (default: 256)')
-parser.add_argument('-dr', '--dropout', default=0.1, type=float,
-                    metavar='DR', help='dropout rate (default: 0.1)')
-
-parser.add_argument('--question_length', default=30, type=int,
-                    help='the length of question (default: 20)')
-parser.add_argument('--option_length', default=35, type=int,
-                    help='the length of option (default: 3)')
+parser.add_argument('--prediction_num', default=12, type=int,
+                    help='the length of question (default: 12)')
+parser.add_argument('--neg_num', default=8, type=int,
+                    help='the length of option (default: 8)')
 
 parser.add_argument('--train_data', default='', type=str, metavar='PATH',
                     help='The path of the training (default: none)')
