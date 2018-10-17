@@ -6,9 +6,13 @@ import _pickle as pk
 import random
 
 class myDataset(torch.utils.data.Dataset):
-    def __init__(self, feat_dir):
+    def __init__(self, feat_dir, phn_boundary_path=None):
         super(myDataset).__init__()
         self.feat_dir = feat_dir
+        if phn_boundary_path is not None:
+            self.phn_boundary = pk.load(open(os.path.join(phn_boundary_path, 'phn_align.pkl'), 'rb'))
+        else:
+            self.phn_boundary = None
         print('finish loading data')
 
     def __len__(self):
@@ -16,7 +20,10 @@ class myDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         feat = pk.load(open(os.path.join(self.feat_dir, str(idx+1)+'.mfcc.pkl'),'rb'))
-        return feat, len(feat)
+        if self.phn_boundary is not None:
+            return feat, len(feat), self.phn_boundary_path[idx+1]
+        else:
+            return feat, len(feat), None
 
     @staticmethod
     def get_collate_fn(prediction_num, neg_num, reduce_times):
@@ -39,7 +46,7 @@ class myDataset(torch.utils.data.Dataset):
 
         def collate_fn(batch):
             # for dataloader
-            all_feat, all_length = zip(*batch)
+            all_feat, all_length, phn_boundary_list = zip(*batch)
             all_feat = _pad_sequence(all_feat)
             all_length = torch.tensor(all_length)
 
@@ -47,7 +54,7 @@ class myDataset(torch.utils.data.Dataset):
             neg_shift = random.sample(range((prediction_num+1)*reduce_times, tensor_length), neg_num)
             neg_shift = torch.tensor(neg_shift)
 
-            return all_feat, all_length, neg_shift
+            return all_feat, all_length, neg_shift, phn_boundary_list
 
         return collate_fn
 
@@ -59,11 +66,12 @@ if __name__ == '__main__':
 
     dataset = myDataset(path)
     collate_fn = myDataset.get_collate_fn(prediction_num, neg_num, reduce_times)
-    data_loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=True, num_workers=4, collate_fn=collate_fn)
+    data_loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=True, num_workers=2, collate_fn=collate_fn)
     for i, data in enumerate(data_loader):
         print('i', i)
         print('feat shape:', data[0].shape)
         print('len shape:', data[1])
         print('neg shape:', data[2])
-        if i == 2:
-            break
+        print('neg shape:', data[3])
+        #if i == 10:
+        #    break
