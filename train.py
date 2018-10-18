@@ -22,7 +22,7 @@ def train(model, train_data_loader, saver, total_epoch, lr, log_path, start_epoc
             feat, length, neg_shift = put_to_cuda([feat, length, neg_shift])
 
             optimizer.zero_grad()
-            loss = model(feat, length, neg_shift)
+            loss, _ = model(feat, length, neg_shift)
             loss.backward()
             optimizer.step()
 

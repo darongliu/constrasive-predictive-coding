@@ -20,7 +20,7 @@ class CPC(nn.Module):
 
         self.layers = nn.ModuleList(self.reduce_layers)
 
-    def forward(self, feat, length, neg_shift):
+    def forward(self, feat, length, neg_shift, train=True):
         # length: reverse order
         z = self.projection_layer(feat)
         for i in range(self.reduce_times):
@@ -28,11 +28,14 @@ class CPC(nn.Module):
             length = (length/2).int()
             neg_shift = (neg_shift/2).int()
 
-        z, _ = mask_with_length(z, length)
-        z_packed = nn.utils.rnn.pack_padded_sequence(z, lengths=length, batch_first=True)
-        c_packed, _ = self.recurrent_layer(z_packed)
-        c, _ = nn.utils.rnn.pad_packed_sequence(c_packed, batch_first=True, total_length=z.size()[-2]) # _ is length
-        return self.NCE_loss_layer(c, z, neg_shift, length)
+        if train:
+            z, _ = mask_with_length(z, length)
+            z_packed = nn.utils.rnn.pack_padded_sequence(z, lengths=length, batch_first=True)
+            c_packed, _ = self.recurrent_layer(z_packed)
+            c, _ = nn.utils.rnn.pad_packed_sequence(c_packed, batch_first=True, total_length=z.size()[-2]) # _ is length
+            return self.NCE_loss_layer(c, z, neg_shift, length), None
+        else:
+            return None, z
 
 if __name__ == '__main__':
     batch = 3
@@ -45,7 +48,7 @@ if __name__ == '__main__':
     length = torch.tensor([90, 80, 60]).cuda()
     m = CPC(input_dim, feat_dim)
     m.cuda()
-    loss = m(test_feat, length, shift)
+    loss, _ = m(test_feat, length, shift)
     print(loss)
     """
     test_feat = torch.rand([batch, len_, dim], dtype=torch.float32).cuda()
