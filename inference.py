@@ -11,7 +11,7 @@ def inference(model, test_data_loader, result_dir, reduce_num):
     all_phn_align = []
 
     count = 0
-    for i, data in tqdm.tqdm(enumerate(train_data_loader)):
+    for i, data in tqdm.tqdm(enumerate(test_data_loader)):
         feat, length, neg_shift, phn_boundary = data
         feat, length, neg_shift = put_to_cuda([feat, length, neg_shift])
 
@@ -34,18 +34,24 @@ def get_phn_seq(phn_boundary, length, reduce_num=2):
 
     all_phn = []
     for i in range(transform_length):
+        phn_temp = []
         for j in range(interval):
             if (phn_boundary[phn_idx][-1] <= counter) and \
                (phn_idx != len(phn_boundary)-1):
                 phn_idx += 1
-            all_phn.append(phn_boundary[phn_idx][0])
+            phn_temp.append(phn_boundary[phn_idx][0])
             counter += 1
+        all_phn.append(get_most_phn(phn_temp))
 
     return all_phn, transform_length
 
-def get_most_phn(phn_list):
+def get_most_phn(lst):
     data = Counter(lst)
     return data.most_common(1)[0][0]
 
-
+if __name__ == '__main__':
+    phn_boundary = pk.load(open('../data/constrasive/processed_ls/phn_align.pkl', 'rb'))
+    one_phn_boundary = phn_boundary[1]
+    phn_list, l = get_phn_seq(one_phn_boundary, one_phn_boundary[-1][-1])
+    print(len(phn_list), l)
 
