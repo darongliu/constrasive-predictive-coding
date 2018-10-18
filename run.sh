@@ -7,7 +7,7 @@ batch_size=32
 learning_rate=0.001
 
 prediction_num=12
-neg_num=12
+neg_num=8
 reduce_num=2
 
 feat_dim=256

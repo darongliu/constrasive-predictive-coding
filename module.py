@@ -51,7 +51,7 @@ class count_NCE_loss(nn.Module):
             zWc = torch.sum((Wc*all_z), -1) #[batch*(self.negative+1) x len]
             zWc = zWc.view([-1, neg_num+1, zWc.size()[-1]])
             f = torch.exp(zWc) # [batch x (self.negative+1) x len]
-            loss  = -torch.log(f[:,0,:]/torch.sum(f[:,1:,:],1)) #[batch x len]
+            loss  = -torch.log(f[:,0,:]/torch.sum(f,1)) #[batch x len]
             loss, mask = mask_with_length(loss, length)
 
             total_loss += torch.sum(loss)/torch.sum(mask)
