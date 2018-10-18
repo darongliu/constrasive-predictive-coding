@@ -3,7 +3,7 @@ import torch.optim as optim
 import torch.nn as nn
 import numpy as np
 
-from util import *
+from utils import *
 
 def train(model, train_data_loader, saver, total_epoch, lr, log_path, start_epoch=0):
     f_log = open(log_path, 'w')

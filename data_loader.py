@@ -5,6 +5,8 @@ import os
 import _pickle as pk
 import random
 
+import sys
+
 class myDataset(torch.utils.data.Dataset):
     def __init__(self, feat_dir, phn_boundary_path=None):
         super(myDataset).__init__()
@@ -46,6 +48,7 @@ class myDataset(torch.utils.data.Dataset):
 
         def collate_fn(batch):
             # for dataloader
+            batch =sorted(batch, key=lambda x:x[1], reverse=True)
             all_feat, all_length, phn_boundary_list = zip(*batch)
             all_feat = _pad_sequence(all_feat)
             all_length = torch.tensor(all_length)
@@ -54,7 +57,7 @@ class myDataset(torch.utils.data.Dataset):
             neg_shift = random.sample(range((prediction_num+1)*reduce_num, tensor_length), neg_num)
             neg_shift = torch.tensor(neg_shift)
 
-            return all_feat, all_length, neg_shift, phn_boundary_list
+            return all_feat.float(), all_length, neg_shift, phn_boundary_list
 
         return collate_fn
 

@@ -6,8 +6,11 @@ import _pickle as pk
 def inference(model, test_data_loader, result_dir, reduce_num):
     model.eval()
 
+    if not os.isdir(result_dir):
+        os.makedirs(result_dir)
     feature_dir = os.path.join(result_dir, 'feature')
-    os.mkdir(feature_dir)
+    if not os.isdir(feature_dir):
+        os.makedirs(feature_dir)
     all_phn_align = []
 
     count = 0
@@ -24,6 +27,8 @@ def inference(model, test_data_loader, result_dir, reduce_num):
             encode_feat = z[i][:transform_length]
             pk.dump(encode_feat, open(os.path.join(feature_dir, str(count+1)+'.encode.feat'), 'wb'))
             count += 1
+
+    pk.dump(all_phn_align, open(os.path.join(result_dir, 'phn_list'), 'wb'))
 
 def get_phn_seq(phn_boundary, length, reduce_num=2):
     interval = 2**reduce_num
