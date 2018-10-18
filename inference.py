@@ -1,8 +1,9 @@
 from collections import Counter
 import os
 import tqdm
+import _pickle as pk
 
-def inference(model, test_data_loader, result_dir):
+def inference(model, test_data_loader, result_dir, reduce_num):
     model.eval()
 
     feature_dir = os.path.join(result_dir, 'feature')
@@ -15,8 +16,14 @@ def inference(model, test_data_loader, result_dir):
         feat, length, neg_shift = put_to_cuda([feat, length, neg_shift])
 
         _, z = model(feat, length, neg_shift, train=False)
+        z = z.cpu().numpy()
         for i in feat.size()[0]:
-            phn_seq, transform_length = get_phn_seq(phn_boundary[i], )
+            phn_seq, transform_length = get_phn_seq(phn_boundary[i], length.cpu().numpy()[0], reduce_num)
+            all_phn_align.append(phn_seq)
+
+            encode_feat = z[i][:transform_length]
+            pk.dump(encode_feat, open(os.path.join(feature_dir, str(count+1)+'.encode.feat'), 'wb'))
+            count += 1
 
 def get_phn_seq(phn_boundary, length, reduce_num=2):
     interval = 2**reduce_num
