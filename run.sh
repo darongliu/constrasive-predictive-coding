@@ -3,7 +3,7 @@ gpu_id=0
 mode='train' # or 'inference'
 
 epochs=100
-batch_size=32
+batch_size=16
 learning_rate=0.001
 
 prediction_num=12

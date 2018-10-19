@@ -17,11 +17,8 @@ class concat_nn(nn.Module):
         feat_len = feat.size()[1]
         feat_dim = feat.size()[2]
         if feat_len%2 == 1:
-            pad = torch.zeros([feat_batch, 1, feat_dim])
-            if feat.is_cuda:
-                pad = pad.cuda()
-            feat = torch.cat([feat, pad], dim=1)
-            feat_len += 1
+            feat = feat[:, :-1, :]
+            feat_len -= 1
         feat = feat.view([feat_batch, int(feat_len/2), feat_dim*2])
 
         return self.linear(F.relu(feat)) #relu -> linear
@@ -42,10 +39,12 @@ class count_NCE_loss(nn.Module):
         '''
         neg_num = neg_shift.size()[0]
         negative_z = [self.shift(z, neg_shift[i]) for i in range(neg_num)]
-        all_z = torch.cat([z, *negative_z], dim=0) #[batch*(self.negative+1) x len x z_dim]
 
         total_loss = 0
         for i in range(self.prediction_num):
+            positive_z = self.shift(z, i+1)
+            all_z = torch.cat([positive_z, *negative_z], dim=0) #[batch*(self.negative+1) x len x z_dim]
+
             Wc = torch.matmul(c, self.bilinear_matrix[i]) #[batch x len x z_dim]
             Wc = Wc.repeat(neg_num+1, 1, 1)
             zWc = torch.sum((Wc*all_z), -1) #[batch*(self.negative+1) x len]
