@@ -23,6 +23,26 @@ class concat_nn(nn.Module):
 
         return self.linear(F.relu(feat)) #relu -> linear
 
+class gated_concat_nn(nn.Module):
+    '''
+    concat two neighbor feature and pass through an nn
+    '''
+    def __init__(self, dim):
+        super(gated_concat_nn, self).__init__()
+        self.linear1 = nn.Linear(2*dim , dim)
+        self.linear2 = nn.Linear(2*dim , dim)
+
+    def forward(self, feat): #feat: [batch, len, dim]
+        feat_batch = feat.size()[0]
+        feat_len = feat.size()[1]
+        feat_dim = feat.size()[2]
+        if feat_len%2 == 1:
+            feat = feat[:, :-1, :]
+            feat_len -= 1
+        feat = feat.view([feat_batch, int(feat_len/2), feat_dim*2])
+
+        return F.tanh(self.linear1(feat))*F.sigmoid(self.linear2(feat)) #relu -> linear
+
 class count_NCE_loss(nn.Module):
     def __init__(self, c_dim, z_dim, prediction_num=12):
         super(count_NCE_loss, self).__init__()
@@ -60,6 +80,7 @@ class count_NCE_loss(nn.Module):
     def shift(self, feat, shift):
         # do not shift vertical
         # shift hotizontal
+        # shift left
         before = feat[:,:shift,:]
         after = feat[:,shift:,:]
         return torch.cat([after, before], dim=1)

@@ -54,7 +54,8 @@ class myDataset(torch.utils.data.Dataset):
             all_length = torch.tensor(all_length)
 
             tensor_length = all_feat.size()[1]
-            neg_shift = random.sample(range((prediction_num+1)*reduce_num, tensor_length), neg_num)
+            interval = 2**reduce_num
+            neg_shift = random.sample(range((prediction_num+1)*interval, tensor_length), neg_num)
             neg_shift = torch.tensor(neg_shift)
 
             return all_feat.float(), all_length, neg_shift, phn_boundary_list
