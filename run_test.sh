@@ -1,6 +1,6 @@
 gpu_id=0
 
-mode='train' # or 'inference'
+mode='inference' # or 'inference'
 
 epochs=100
 batch_size=16
@@ -17,8 +17,8 @@ test_dir='/home/darong/darong/data/constrasive/processed_ls'
 #train_dir='/home/kgb/qacnn_1d/data/movie_qa/train_part.json'
 #test_dir='/home/kgb/qacnn_1d/data/movie_qa/dev_part.json'
 
-#resume_dir='./model/cpc'
-save_dir='./model/test'
+resume_dir='./model/cpc'
+save_dir='./model/cpc'
 result_dir='./new_data/'
 
 CUDA_VISIBLE_DEVICES=$gpu_id python main.py $mode \
@@ -28,4 +28,4 @@ CUDA_VISIBLE_DEVICES=$gpu_id python main.py $mode \
 --train_dir $train_dir --test_dir $test_dir \
 --save_dir $save_dir \
 --result_dir $result_dir \
-
+--resume_dir $resume_dir

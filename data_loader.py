@@ -12,7 +12,7 @@ class myDataset(torch.utils.data.Dataset):
         super(myDataset).__init__()
         self.feat_dir = feat_dir
         if phn_boundary_path is not None:
-            self.phn_boundary = pk.load(open(os.path.join(phn_boundary_path, 'phn_align.pkl'), 'rb'))
+            self.phn_boundary = pk.load(open(phn_boundary_path, 'rb'))
         else:
             self.phn_boundary = None
         print('finish loading data')
@@ -23,12 +23,12 @@ class myDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         feat = pk.load(open(os.path.join(self.feat_dir, str(idx+1)+'.mfcc.pkl'),'rb'))
         if self.phn_boundary is not None:
-            return feat, len(feat), self.phn_boundary_path[idx+1]
+            return feat, len(feat), self.phn_boundary[idx+1]
         else:
             return feat, len(feat), None
 
     @staticmethod
-    def get_collate_fn(prediction_num, neg_num, reduce_num):
+    def get_collate_fn(prediction_num, neg_num, reduce_times, train=True):
 
         def _pad_sequence(np_list, length=None):
             tensor_list = [torch.from_numpy(np_array) for np_array in np_list]
@@ -48,13 +48,14 @@ class myDataset(torch.utils.data.Dataset):
 
         def collate_fn(batch):
             # for dataloader
-            batch =sorted(batch, key=lambda x:x[1], reverse=True)
+            if train:
+                batch =sorted(batch, key=lambda x:x[1], reverse=True)
             all_feat, all_length, phn_boundary_list = zip(*batch)
             all_feat = _pad_sequence(all_feat)
             all_length = torch.tensor(all_length)
 
             tensor_length = all_feat.size()[1]
-            interval = 2**reduce_num
+            interval = 2**reduce_times
             neg_shift = random.sample(range((prediction_num+1)*interval, tensor_length), neg_num)
             neg_shift = torch.tensor(neg_shift)
 
@@ -66,10 +67,10 @@ if __name__ == '__main__':
     path = '/home/darong/darong/data/constrasive/processed_ls/feature'
     prediction_num=3
     neg_num=5
-    reduce_num=2
+    reduce_times=2
 
     dataset = myDataset(path)
-    collate_fn = myDataset.get_collate_fn(prediction_num, neg_num, reduce_num)
+    collate_fn = myDataset.get_collate_fn(prediction_num, neg_num, reduce_times)
     data_loader = torch.utils.data.DataLoader(dataset, batch_size=10, shuffle=True, num_workers=2, collate_fn=collate_fn)
     for i, data in enumerate(data_loader):
         print('i', i)

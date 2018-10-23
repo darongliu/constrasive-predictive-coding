@@ -24,7 +24,7 @@ parser.add_argument('--prediction_num', default=12, type=int,
                     help='the length of question (default: 12)')
 parser.add_argument('--neg_num', default=12, type=int,
                     help='the length of option (default: 8)')
-parser.add_argument('--reduce_num', default=2, type=int,
+parser.add_argument('--reduce_times', default=2, type=int,
                     help='the reduce number in the encoder (default: 2)')
 
 parser.add_argument('--input_dim', default=39, type=int,
@@ -51,10 +51,10 @@ def main(args):
     if args.pos1 == 'train':
         train_dataset = myDataset(os.path.join(args.train_dir, 'feature'))
         #prepare dataloader
-        train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, collate_fn=myDataset.get_collate_fn(args.prediction_num, args.neg_num, args.reduce_num))
+        train_data_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, collate_fn=myDataset.get_collate_fn(args.prediction_num, args.neg_num, args.reduce_times))
         saver = pytorch_saver(10, args.save_dir)
         #build model
-        model = CPC(args.input_dim, args.feat_dim)
+        model = CPC(args.input_dim, args.feat_dim, reduce_times=args.reduce_times, prediction_num=args.prediction_num)
         if args.resume_dir != '':
             model.load_state_dict(pytorch_saver.load_dir(args.resume_dir)['state_dict'])
 
@@ -64,18 +64,18 @@ def main(args):
         train(model, train_data_loader, saver, args.epochs, args.learning_rate, args.log)
 
     else:
-        test_dataset = myDataset(os.path.join(args.train_dir, 'feature'), os.path.join(args.train_dir, 'phn_align.pkl'))
-        test_data_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=4)
+        test_dataset = myDataset(os.path.join(args.test_dir, 'feature'), os.path.join(args.test_dir, 'phn_align.pkl'))
+        test_data_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=4, collate_fn=myDataset.get_collate_fn(args.prediction_num, args.neg_num, args.reduce_times, train=False))
         if args.resume_dir == '':
             print("resume should exist in inference mode", file=sys.stderr)
             sys.exit(-1)
         else:
-            model = CPC(args.input_dim, args.feat_dim)
+            model = CPC(args.input_dim, args.feat_dim, reduce_times=args.reduce_times, prediction_num=args.prediction_num)
             model.load_state_dict(pytorch_saver.load_dir(args.resume_dir)['state_dict'])
             model.eval()
             model.cuda()
 
-            inference(model, test_data_loader, args.result_dir, args.reduce_num)
+            inference(model, test_data_loader, args.result_dir, args.reduce_times)
 
 if __name__ == '__main__':
     args = parser.parse_args()
