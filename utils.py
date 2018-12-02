@@ -14,7 +14,7 @@ def mask_with_length(tensor, length):
     rank = len(tensor.size())
 
     a = torch.arange(tensor_length).unsqueeze(-1).expand_as(tensor).int()
-    b = length.view(-1, *([1]*(rank-1))).expand_as(tensor).int()
+    b = length.view(-1, *([1]*(rank-1))).int()
     if tensor.is_cuda:
         a = a.cuda()
         b = b.cuda()
