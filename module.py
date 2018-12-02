@@ -68,6 +68,8 @@ class count_NCE_loss(nn.Module):
             Wc = torch.matmul(c, self.bilinear_matrix[i]) #[batch x len x z_dim]
             Wc = Wc.unsqueeze(1).repeat(1,(neg_num+1),1,1) #[batch x (self.negative+1) x len x z_dim]
             zWc = torch.sum((Wc*all_z), -1) #[batch x (self.negative+1) x len]
+            zWc_max, _ = torch.max(zWc,1)
+            zWc = zWc-zWc_max.unsqueeze(1)
             f = torch.exp(zWc) # [batch x (self.negative+1) x len]
             loss  = -torch.log(f[:,0,:]/torch.sum(f,1)) #[batch x len]
             loss, mask = mask_with_length(loss, length)
