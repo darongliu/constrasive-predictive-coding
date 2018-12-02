@@ -63,12 +63,11 @@ class count_NCE_loss(nn.Module):
         total_loss = 0
         for i in range(self.prediction_num):
             positive_z = self.shift(z, i+1)
-            all_z = torch.cat([positive_z, *negative_z], dim=0) #[batch*(self.negative+1) x len x z_dim]
+            all_z = torch.stack([positive_z, *negative_z], dim=1) #[batch x (self.negative+1) x len x z_dim]
 
             Wc = torch.matmul(c, self.bilinear_matrix[i]) #[batch x len x z_dim]
-            Wc = Wc.repeat(neg_num+1, 1, 1)
-            zWc = torch.sum((Wc*all_z), -1) #[batch*(self.negative+1) x len]
-            zWc = zWc.view([-1, neg_num+1, zWc.size()[-1]])
+            Wc = Wc.unsqueeze(1).repeat(1,(neg_num+1),1,1) #[batch x (self.negative+1) x len x z_dim]
+            zWc = torch.sum((Wc*all_z), -1) #[batch x (self.negative+1) x len]
             f = torch.exp(zWc) # [batch x (self.negative+1) x len]
             loss  = -torch.log(f[:,0,:]/torch.sum(f,1)) #[batch x len]
             loss, mask = mask_with_length(loss, length)

@@ -22,7 +22,7 @@ parser.add_argument('--learning_rate', default=0.001, type=float,
 
 parser.add_argument('--prediction_num', default=12, type=int,
                     help='the length of question (default: 12)')
-parser.add_argument('--neg_num', default=12, type=int,
+parser.add_argument('--neg_num', default=8, type=int,
                     help='the length of option (default: 8)')
 parser.add_argument('--reduce_times', default=2, type=int,
                     help='the reduce number in the encoder (default: 2)')
