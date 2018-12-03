@@ -34,8 +34,8 @@ def train(model, train_data_loader, saver, total_epoch, lr, log_path, start_epoc
             log = f'epoch{epoch}, {i}/{len(train_data_loader)}, train average loss: {average_loss}'
             print_and_logging(f_log, log)
 
-        if total_loss < min_loss:
-            min_loss = total_loss
+        if average_loss < min_loss:
+            min_loss = average_loss
             log = 'save model'
             print_and_logging(f_log, log)
             #save model
@@ -51,5 +51,5 @@ def train(model, train_data_loader, saver, total_epoch, lr, log_path, start_epoc
         else:
             log = f'higher loss!!!!!!'
             print_and_logging(f_log, log)
-    log = 'training end, min loss: ' + str(min_loss)
+    log = 'training end, min loss: ' + str(average_loss)
     print_and_logging(f_log, log)

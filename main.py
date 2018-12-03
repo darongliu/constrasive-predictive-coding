@@ -56,6 +56,7 @@ def main(args):
         #build model
         model = CPC(args.input_dim, args.feat_dim, reduce_times=args.reduce_times, prediction_num=args.prediction_num)
         if args.resume_dir != '':
+            print('loading model')
             model.load_state_dict(pytorch_saver.load_dir(args.resume_dir)['state_dict'])
 
         model.train()
@@ -71,6 +72,7 @@ def main(args):
             sys.exit(-1)
         else:
             model = CPC(args.input_dim, args.feat_dim, reduce_times=args.reduce_times, prediction_num=args.prediction_num)
+            print('loading model')
             model.load_state_dict(pytorch_saver.load_dir(args.resume_dir)['state_dict'])
             model.eval()
             model.cuda()
