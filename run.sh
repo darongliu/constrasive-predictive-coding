@@ -27,5 +27,6 @@ CUDA_VISIBLE_DEVICES=$gpu_id python main.py $mode \
 --feat_dim $feat_dim \
 --train_dir $train_dir --test_dir $test_dir \
 --save_dir $save_dir \
+--resume_dir $resume_dir \
 --result_dir $result_dir \
 
