@@ -17,7 +17,7 @@ test_dir='/home/darong/darong/data/constrasive/processed_ls'
 #train_dir='/home/kgb/qacnn_1d/data/movie_qa/train_part.json'
 #test_dir='/home/kgb/qacnn_1d/data/movie_qa/dev_part.json'
 
-resume_dir='./model/cpc'
+resume_dir='./model/test_cont'
 save_dir='./model/cpc'
 result_dir='./new_data/'
 
